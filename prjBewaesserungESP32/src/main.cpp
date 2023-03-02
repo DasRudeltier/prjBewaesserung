@@ -9,6 +9,5 @@ void setup() {
 void loop() {
   //LCD_TEST();
   LCD_NEXT();
-  TEST;
 }
 
