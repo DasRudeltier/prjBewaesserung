@@ -4,10 +4,11 @@
 void setup() {
   LCD_INIT();
   FAN_INIT();
-}s
+}
 
 void loop() {
   //LCD_TEST();
   LCD_NEXT();
+  TEST;
 }
 
