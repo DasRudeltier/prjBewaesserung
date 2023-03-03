@@ -1,6 +1,13 @@
 #define pSDA 21
 #define pSCL 22
 #define pFAN 19
+#define pERDE 34
+
+float temp1 = 0.0;
+
+float _TEMPERATUR = 0;
+float _ERDFEUCHT = 0;
+float _LICHT = 0;
 
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
@@ -34,18 +41,20 @@ void FAN_INIT(){
     digitalWrite(pFAN,HIGH);
     delay(1500);
     digitalWrite(pFAN,LOW);
+    delay(1500);
 }
 
 void FAN(bool anaus){
 if(anaus)digitalWrite(pFAN, HIGH);else{digitalWrite(pFAN,LOW);}
 }
 
-void TEMP_LESEN(){
+float TEMP_LESEN(){
 
 }
 
-void HUMID_LESEN(){
-
+float HUMID_LESEN(){
+  temp1=analogRead(pERDE);
+  return temp1;
 }
 
 int LCD_NEXT_1 = 0;
@@ -60,4 +69,14 @@ void LCD_NEXT(){
 
 void LCD_PREV(){
 
+}
+
+void INIT_SERIAL(){
+  Serial.begin(9600);
+  Serial.println("Serial INIT.");
+}
+
+void UPDATE(){
+  _ERDFEUCHT = HUMID_LESEN();
+  _TEMPERATUR = TEMP_LESEN();
 }
