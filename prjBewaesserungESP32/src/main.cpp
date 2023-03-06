@@ -1,16 +1,20 @@
 #include <Arduino.h>
-#include <options.h>
+#include <func.h>
 
 void setup() {
+  INIT_LCD();
+    delay(500);
   INIT_SERIAL();
-  LCD_INIT();
-  FAN_INIT();
+    delay(500);
+  INIT_FAN();
+    delay(500);
+  INIT_PUMP();
+    delay(500);
+  INIT_LED();
 }
 
 void loop() {
-  //LCD_TEST();
-  //LCD_NEXT();
-  FAN_INIT();
-  
+  CYCLE_INFO();
+  delay(2000);
 }
 
