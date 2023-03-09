@@ -69,6 +69,7 @@ if(anaus)digitalWrite(pFAN, HIGH);else{digitalWrite(pFAN,LOW);}
 
 float TEMP_LESEN(){
 
+return 0;
 }
 
 float HUMID_LESEN(){
@@ -100,11 +101,11 @@ void UPDATE(){
   _TEMPERATUR = TEMP_LESEN();
 }
 
-void LCD_WRITE(String EING){
+void LCD_WRITE(String EING, int ZEICHEN){
   lcd.home();
   lcd.print("                ");
   lcd.home();
-  lcd.print(EING);
+  lcd.print(EING+"\xDF"+"C"); //HIER WAR ICH STEHENGEBLIEBEN!
   delay(300);
 }
 
@@ -115,29 +116,29 @@ float HELLIGKEIT_LESEN(){
 
 int i = 0;
 void CYCLE_INFO(){
-  String iWert = "";
+  int iWert;
   String sBeschriftung = "";
-  String sZeichen = "";
+  int sZeichen = 0;
   switch (i)
   {
   case 1:
-    int iWert = HUMID_LESEN();
+    iWert = HUMID_LESEN();
     sBeschriftung = "Feuchtigkeit: ";
-    sZeichen = "%";
+    sZeichen = 2;
     break;
   case 2:
-    int iWert = TEMP_LESEN();
+    iWert = TEMP_LESEN();
     sBeschriftung = "Temperatur: ";
-    sZeichen = "°";
+    sZeichen = 1;
     break;
   case 3:
-    int iWert = HELLIGKEIT_LESEN();
+    iWert = HELLIGKEIT_LESEN();
     sBeschriftung = "Helligkeit: ";
-    sZeichen = "";
+    sZeichen = 0;
     i = 0;
     break;
   }
-  LCD_WRITE(sBeschriftung + String(iWert) + sZeichen);
+  LCD_WRITE(sBeschriftung + String(iWert), sZeichen);
   i++;
   delay(300);
 }
