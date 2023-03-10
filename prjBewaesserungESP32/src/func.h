@@ -8,6 +8,7 @@
 float temp1 = 0.0;
 
 float _TEMPERATUR = 0;
+float _LUFTFEUCHT = 0;
 float _ERDFEUCHT = 0;
 float _LICHT = 0;
 
@@ -35,6 +36,7 @@ void LCD_TEST(){
 void INIT_LCD(){
   lcd.init();
   lcd.backlight();
+  lcd.println("GUTEN TAG!");
   lcd.clear();
 }
 
@@ -54,9 +56,9 @@ void INIT_PUMP(){
 
 void INIT_LED(){
     pinMode(14, OUTPUT);
-    analogWrite(14, 255);
+    digitalWrite(pUV, HIGH);
     delay(1500);
-    analogWrite(14, 0);
+    analogWrite(pUV, LOW);
 }
 
 void INIT_TEST(){
@@ -101,11 +103,11 @@ void UPDATE(){
   _TEMPERATUR = TEMP_LESEN();
 }
 
-void LCD_WRITE(String EING, int ZEICHEN){
+void LCD_WRITE(String EING){
   lcd.home();
   lcd.print("                ");
   lcd.home();
-  lcd.print(EING+"\xDF"+"C"); //HIER WAR ICH STEHENGEBLIEBEN!
+  lcd.print(EING);
   delay(300);
 }
 
@@ -114,31 +116,24 @@ float HELLIGKEIT_LESEN(){
   return temp1;
 }
 
-int i = 0;
+int i = 1;
 void CYCLE_INFO(){
-  int iWert;
+  UPDATE();
   String sBeschriftung = "";
-  int sZeichen = 0;
   switch (i)
   {
   case 1:
-    iWert = HUMID_LESEN();
-    sBeschriftung = "Feuchtigkeit: ";
-    sZeichen = 2;
+    sBeschriftung = "Feucht.: "+String(_LUFTFEUCHT)+"%";
     break;
   case 2:
-    iWert = TEMP_LESEN();
-    sBeschriftung = "Temperatur: ";
-    sZeichen = 1;
+    sBeschriftung = "Temp.: "+String(_TEMPERATUR)+" \xDF C";
     break;
   case 3:
-    iWert = HELLIGKEIT_LESEN();
-    sBeschriftung = "Helligkeit: ";
-    sZeichen = 0;
-    i = 0;
+    sBeschriftung = "Licht: "+String(_LICHT)+" LUX";
+    i=0;
     break;
   }
-  LCD_WRITE(sBeschriftung + String(iWert), sZeichen);
+  LCD_WRITE(sBeschriftung);
   i++;
   delay(300);
 }
