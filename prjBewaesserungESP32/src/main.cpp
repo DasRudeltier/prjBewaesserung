@@ -2,8 +2,6 @@
 #include <func.h>
 
 void setup() {
-  INIT_LCD();
-    delay(500);
   INIT_SERIAL();
     delay(500);
   INIT_FAN();
@@ -11,6 +9,8 @@ void setup() {
   INIT_PUMP();
     delay(500);
   INIT_LED();
+    delay(500);
+  INIT_LCD();
 }
 
 void loop() {
