@@ -11,10 +11,13 @@ void setup() {
   INIT_LED();
     delay(500);
   INIT_LCD();
+    delay(500);
+  INIT_RE();
+
 }
 
 void loop() {
-  CYCLE_INFO();
-  delay(2000);
+  //CYCLE_INFO();
+  rotary_loop();
 }
 

@@ -5,6 +5,13 @@
 #define pUV 14
 #define pERDE 12
 
+
+#define ROTARY_ENCODER_A_PIN 33
+#define ROTARY_ENCODER_B_PIN 32
+#define ROTARY_ENCODER_BUTTON_PIN 35
+#define ROTARY_ENCODER_VCC_PIN 16
+#define ROTARY_ENCODER_STEPS 3 //WENN NICHT RICHTIG DANN 1,2,3,4 VERSUCHEN
+
 float temp1 = 0.0;
 
 float _TEMPERATUR = 0;
@@ -15,6 +22,8 @@ float _LICHT = 0;
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
 #include <Arduino.h>
+#include <AiEsp32RotaryEncoder.h>
+#include <customchars.h>
 
 String MENU[4][2] = 
 {
@@ -65,17 +74,27 @@ void INIT_TEST(){
   
 }
 
-void FAN(bool anaus){
+void FAN(bool anaus){ //EF - Lüfter ein/ausschalten | EIG - true/false
 if(anaus)digitalWrite(pFAN, HIGH);else{digitalWrite(pFAN,LOW);}
 }
 
-float TEMP_LESEN(){
+float TEMP_LESEN(){ //EF - Temperatursensor einlesen und speichern
 
 return 0;
 }
 
-float HUMID_LESEN(){
+float DIRTHUMID_LESEN(){
   temp1=analogRead(pERDE);
+  return temp1;
+}
+
+float HUMID_LESEN(){
+  
+  return temp1;
+}
+
+float LICHT_LESEN(){
+  
   return temp1;
 }
 
@@ -99,8 +118,10 @@ void INIT_SERIAL(){
 }
 
 void UPDATE(){
-  _ERDFEUCHT = HUMID_LESEN();
+  _ERDFEUCHT = DIRTHUMID_LESEN();
   _TEMPERATUR = TEMP_LESEN();
+  _LUFTFEUCHT = HUMID_LESEN();
+  _LICHT = LICHT_LESEN();
 }
 
 void LCD_WRITE(String EING){
@@ -136,4 +157,52 @@ void CYCLE_INFO(){
   LCD_WRITE(sBeschriftung);
   i++;
   delay(300);
+}
+
+/*###############################*/
+/*####### ROATARY ENCODER #######*/
+/*###############################*/
+
+AiEsp32RotaryEncoder rotaryEncoder = AiEsp32RotaryEncoder(ROTARY_ENCODER_A_PIN, ROTARY_ENCODER_B_PIN, ROTARY_ENCODER_BUTTON_PIN, ROTARY_ENCODER_VCC_PIN, ROTARY_ENCODER_STEPS);
+
+void rotary_onButtonClick()
+{
+	static unsigned long lastTimePressed = 0;
+	//ignore multiple press in that time milliseconds
+	if (millis() - lastTimePressed < 500)
+	{
+		return;
+	}
+	lastTimePressed = millis();
+  lcd.clear();
+  lcd.println(millis());
+  lcd.print(" milliseconds after restart");
+}
+
+void rotary_loop()
+{
+	//dont print anything unless value changed
+	if (rotaryEncoder.encoderChanged())
+	{ 
+    lcd.clear();
+    lcd.print("Value: ");
+    lcd.println(rotaryEncoder.readEncoder());
+	}
+	if (rotaryEncoder.isEncoderButtonClicked())
+	{
+		rotary_onButtonClick();
+	}
+}
+
+void IRAM_ATTR readEncoderISR()
+{
+	rotaryEncoder.readEncoder_ISR();
+}
+
+void INIT_RE(){
+	rotaryEncoder.begin();
+	rotaryEncoder.setup(readEncoderISR);
+	bool circleValues = false;
+	rotaryEncoder.setBoundaries(0, 3, true); //minValue, maxValue, circleValues true|false (when max go to min and vice versa)
+	rotaryEncoder.setAcceleration(0); //or set the value - larger number = more accelearation; 0 or 1 means disabled acceleration
 }
