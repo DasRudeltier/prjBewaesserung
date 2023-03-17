@@ -23,20 +23,13 @@ float _TEMPERATUR = 0;
 float _LUFTFEUCHT = 0;
 float _ERDFEUCHT = 0;
 float _LICHT = 0;
+bool DEBUG = false;
 
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
 #include <Arduino.h>
 #include <AiEsp32RotaryEncoder.h>
 #include <customchars.h>
-
-String MENU[4][2] = 
-{
-    {"MENU1","TEST1"},
-    {"MENU2","TEST2"},
-    {"MENU3","TEST3"},
-    {"MENU4","TEST4"},
-};
 
 LiquidCrystal_I2C lcd(0x27,16,2);
 
@@ -50,40 +43,51 @@ void LCD_TEST(){
 void INIT_LCD(){
   lcd.init();
   lcd.backlight();
-  lcd.println("GUTEN TAG!");
   lcd.clear();
+}
+
+void LCD_WRITE(String EING){
+  lcd.home();
+  lcd.print("                ");
+  lcd.home();
+  lcd.print(EING);
+  delay(300);
 }
 
 void INIT_FAN(){
   pinMode(pFAN, OUTPUT);
-  digitalWrite(pFAN, HIGH);
-  delay(1500);
-  digitalWrite(pFAN, LOW);
+  if(DEBUG)digitalWrite(pFAN, HIGH);
+  if(DEBUG)delay(1500);
+  if(DEBUG)digitalWrite(pFAN, LOW);
   Serial.println("FAN INIT.");
+  LCD_WRITE("FAN Ready!");
 }
 
 void INIT_PUMP(){
   pinMode(pPUMP, OUTPUT);
-  digitalWrite(pPUMP, HIGH);
-  delay(1500);
-  digitalWrite(pPUMP, LOW);
+  if(DEBUG)digitalWrite(pPUMP, HIGH);
+  if(DEBUG)delay(1500);
+  if(DEBUG)digitalWrite(pPUMP, LOW);
   Serial.println("PUMP INIT.");
+  LCD_WRITE("PUMP Ready!");
 }
 
 void INIT_LED(){
   pinMode(14, OUTPUT);
-  digitalWrite(pUV, HIGH);
-  delay(1500);
-  analogWrite(pUV, LOW);
+  if(DEBUG)digitalWrite(pUV, HIGH);
+  if(DEBUG)delay(1500);
+  if(DEBUG)analogWrite(pUV, LOW);
   Serial.println("UV/LED INIT.");
+  LCD_WRITE("LED Ready!");
 }
 
 void INIT_TEST(){
   Serial.println("TEST INIT.");
+  LCD_WRITE("TESTING!");
 }
 
 void FAN(bool anaus){ //EF - Lüfter ein/ausschalten | EIG - true/false
-if(anaus)digitalWrite(pFAN, HIGH);else{digitalWrite(pFAN,LOW);}
+  if(anaus)digitalWrite(pFAN, HIGH);else{digitalWrite(pFAN,LOW);}
 }
 
 void TEMP_LESEN(){ //EF - Temperatursensor einlesen und speichern
@@ -102,16 +106,6 @@ void LICHT_LESEN(){
   _LICHT = 0;
 }
 
-int LCD_NEXT_1 = 0;
-void LCD_NEXT(){   
-    lcd.home();
-    lcd.clear();
-    lcd.println(MENU[LCD_NEXT_1][1]);
-    delay(1000);
-    LCD_NEXT_1++;
-    if(LCD_NEXT_1==4)LCD_NEXT_1=0; 
-}
-
 void LCD_PREV(){
 
 }
@@ -119,6 +113,7 @@ void LCD_PREV(){
 void INIT_SERIAL(){
   Serial.begin(9600);
   Serial.println("Serial INIT.");
+  LCD_WRITE("SERIAL Ready!");
 }
 
 void UPDATE(){
@@ -126,14 +121,6 @@ void UPDATE(){
   TEMP_LESEN();
   HUMID_LESEN();
   LICHT_LESEN();
-}
-
-void LCD_WRITE(String EING){
-  lcd.home();
-  lcd.print("                ");
-  lcd.home();
-  lcd.print(EING);
-  delay(300);
 }
 
 int i = 1;

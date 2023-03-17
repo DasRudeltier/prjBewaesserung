@@ -2,6 +2,8 @@
 #include <func.h>
 
 void setup() {
+  INIT_LCD();
+    delay(500);
   INIT_SERIAL();
     delay(500);
   INIT_FAN();
@@ -10,14 +12,11 @@ void setup() {
     delay(500);
   INIT_LED();
     delay(500);
-  INIT_LCD();
-    delay(500);
-  INIT_RE();
-
+  //INIT_RE();
 }
 
 void loop() {
-  //CYCLE_INFO();
-  rotary_loop();
+  CYCLE_INFO();
+  //rotary_loop();
 }
 
