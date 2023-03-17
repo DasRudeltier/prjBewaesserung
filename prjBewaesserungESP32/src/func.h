@@ -5,6 +5,11 @@
 #define pUV 14
 #define pERDE 12
 
+//I2C Adressen
+//0x27 LCD 16x2 Display
+//0x40 Temperatur
+//0x23 Helligkeitssensor
+
 
 #define ROTARY_ENCODER_A_PIN 33
 #define ROTARY_ENCODER_B_PIN 32
@@ -50,52 +55,51 @@ void INIT_LCD(){
 }
 
 void INIT_FAN(){
-    pinMode(pFAN, OUTPUT);
-    digitalWrite(pFAN, HIGH);
-    delay(1500);
-    digitalWrite(pFAN, LOW);
+  pinMode(pFAN, OUTPUT);
+  digitalWrite(pFAN, HIGH);
+  delay(1500);
+  digitalWrite(pFAN, LOW);
+  Serial.println("FAN INIT.");
 }
 
 void INIT_PUMP(){
-    pinMode(pPUMP, OUTPUT);
-    digitalWrite(pPUMP, HIGH);
-    delay(1500);
-    digitalWrite(pPUMP, LOW);
+  pinMode(pPUMP, OUTPUT);
+  digitalWrite(pPUMP, HIGH);
+  delay(1500);
+  digitalWrite(pPUMP, LOW);
+  Serial.println("PUMP INIT.");
 }
 
 void INIT_LED(){
-    pinMode(14, OUTPUT);
-    digitalWrite(pUV, HIGH);
-    delay(1500);
-    analogWrite(pUV, LOW);
+  pinMode(14, OUTPUT);
+  digitalWrite(pUV, HIGH);
+  delay(1500);
+  analogWrite(pUV, LOW);
+  Serial.println("UV/LED INIT.");
 }
 
 void INIT_TEST(){
-  
+  Serial.println("TEST INIT.");
 }
 
 void FAN(bool anaus){ //EF - Lüfter ein/ausschalten | EIG - true/false
 if(anaus)digitalWrite(pFAN, HIGH);else{digitalWrite(pFAN,LOW);}
 }
 
-float TEMP_LESEN(){ //EF - Temperatursensor einlesen und speichern
-
-return 0;
+void TEMP_LESEN(){ //EF - Temperatursensor einlesen und speichern
+  _TEMPERATUR = 0;
 }
 
-float DIRTHUMID_LESEN(){
-  temp1=analogRead(pERDE);
-  return temp1;
+void DIRTHUMID_LESEN(){
+  _ERDFEUCHT=analogRead(pERDE);
 }
 
-float HUMID_LESEN(){
-  
-  return temp1;
+void HUMID_LESEN(){ //EF - Temperatursensor(Feuchtigkeit) einlesen und speichern
+  _LUFTFEUCHT = 0;
 }
 
-float LICHT_LESEN(){
-  
-  return temp1;
+void LICHT_LESEN(){
+  _LICHT = 0;
 }
 
 int LCD_NEXT_1 = 0;
@@ -118,10 +122,10 @@ void INIT_SERIAL(){
 }
 
 void UPDATE(){
-  _ERDFEUCHT = DIRTHUMID_LESEN();
-  _TEMPERATUR = TEMP_LESEN();
-  _LUFTFEUCHT = HUMID_LESEN();
-  _LICHT = LICHT_LESEN();
+  DIRTHUMID_LESEN();
+  TEMP_LESEN();
+  HUMID_LESEN();
+  LICHT_LESEN();
 }
 
 void LCD_WRITE(String EING){
@@ -130,11 +134,6 @@ void LCD_WRITE(String EING){
   lcd.home();
   lcd.print(EING);
   delay(300);
-}
-
-float HELLIGKEIT_LESEN(){
-
-  return temp1;
 }
 
 int i = 1;
@@ -151,17 +150,22 @@ void CYCLE_INFO(){
     break;
   case 3:
     sBeschriftung = "Licht: "+String(_LICHT)+" LUX";
+    break;
+  case 4:
+    sBeschriftung = "Erde: "+String(_ERDFEUCHT)+"%";
     i=0;
     break;
   }
   LCD_WRITE(sBeschriftung);
   i++;
-  delay(300);
+  delay(3000);
 }
+
 
 /*###############################*/
 /*####### ROATARY ENCODER #######*/
 /*###############################*/
+/*                                              ########SPÄTER!########
 
 AiEsp32RotaryEncoder rotaryEncoder = AiEsp32RotaryEncoder(ROTARY_ENCODER_A_PIN, ROTARY_ENCODER_B_PIN, ROTARY_ENCODER_BUTTON_PIN, ROTARY_ENCODER_VCC_PIN, ROTARY_ENCODER_STEPS);
 
@@ -206,3 +210,5 @@ void INIT_RE(){
 	rotaryEncoder.setBoundaries(0, 3, true); //minValue, maxValue, circleValues true|false (when max go to min and vice versa)
 	rotaryEncoder.setAcceleration(0); //or set the value - larger number = more accelearation; 0 or 1 means disabled acceleration
 }
+
+*/
