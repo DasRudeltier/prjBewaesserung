@@ -12,11 +12,16 @@ void setup() {
     delay(500);
   INIT_LED();
     delay(500);
+  INIT_LIGHT();
+    delay(500);
+  INIT_TEMP();
+    delay(500);
   //INIT_RE();
 }
 
 void loop() {
   CYCLE_INFO();
+  LOOP_STEUERUNG();
+  SERIAL_SEND();
   //rotary_loop();
 }
-

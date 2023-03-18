@@ -10,7 +10,6 @@
 //0x40 Temperatur
 //0x23 Helligkeitssensor
 
-
 #define ROTARY_ENCODER_A_PIN 33
 #define ROTARY_ENCODER_B_PIN 32
 #define ROTARY_ENCODER_BUTTON_PIN 35
@@ -25,13 +24,21 @@ float _ERDFEUCHT = 0;
 float _LICHT = 0;
 bool DEBUG = false;
 
+bool bFAN;
+bool bUV;
+bool bPUMP;
+
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
 #include <Arduino.h>
 #include <AiEsp32RotaryEncoder.h>
 #include <customchars.h>
+#include <BH1750.h>
+#include <SHT2x.h>
 
 LiquidCrystal_I2C lcd(0x27,16,2);
+BH1750 lightMeter(0x23);
+SHT2x sht;
 
 int var83;
 void LCD_TEST(){
@@ -59,7 +66,6 @@ void INIT_FAN(){
   if(DEBUG)digitalWrite(pFAN, HIGH);
   if(DEBUG)delay(1500);
   if(DEBUG)digitalWrite(pFAN, LOW);
-  Serial.println("FAN INIT.");
   LCD_WRITE("FAN Ready!");
 }
 
@@ -68,7 +74,6 @@ void INIT_PUMP(){
   if(DEBUG)digitalWrite(pPUMP, HIGH);
   if(DEBUG)delay(1500);
   if(DEBUG)digitalWrite(pPUMP, LOW);
-  Serial.println("PUMP INIT.");
   LCD_WRITE("PUMP Ready!");
 }
 
@@ -76,14 +81,29 @@ void INIT_LED(){
   pinMode(14, OUTPUT);
   if(DEBUG)digitalWrite(pUV, HIGH);
   if(DEBUG)delay(1500);
-  if(DEBUG)analogWrite(pUV, LOW);
-  Serial.println("UV/LED INIT.");
+  if(DEBUG)digitalWrite(pUV, LOW);
   LCD_WRITE("LED Ready!");
 }
 
 void INIT_TEST(){
-  Serial.println("TEST INIT.");
   LCD_WRITE("TESTING!");
+}
+
+void INIT_LIGHT(){
+  if (lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE)) {
+    LCD_WRITE("Lichtsen. READY!");
+  } else {
+    LCD_WRITE("Lichtsen. ERROR!");
+  }
+}
+
+void INIT_TEMP(){
+  sht.begin();
+  if(sht.isConnected()){
+    LCD_WRITE("Tempsen. READY!");
+  }else{
+    LCD_WRITE("Tempsen. ERROR!");
+  }
 }
 
 void FAN(bool anaus){ //EF - Lüfter ein/ausschalten | EIG - true/false
@@ -91,19 +111,23 @@ void FAN(bool anaus){ //EF - Lüfter ein/ausschalten | EIG - true/false
 }
 
 void TEMP_LESEN(){ //EF - Temperatursensor einlesen und speichern
-  _TEMPERATUR = 0;
+  bool b = sht.read();
+  _TEMPERATUR = sht.getTemperature();
 }
 
 void DIRTHUMID_LESEN(){
-  _ERDFEUCHT=analogRead(pERDE);
+  _ERDFEUCHT=analogRead(pERDE)/4096.0*100.0;
 }
 
 void HUMID_LESEN(){ //EF - Temperatursensor(Feuchtigkeit) einlesen und speichern
-  _LUFTFEUCHT = 0;
+  bool b = sht.read();
+  _LUFTFEUCHT = sht.getHumidity();
 }
 
 void LICHT_LESEN(){
-  _LICHT = 0;
+  if (lightMeter.measurementReady()) {
+    _LICHT = lightMeter.readLightLevel();
+  }
 }
 
 void LCD_PREV(){
@@ -112,8 +136,7 @@ void LCD_PREV(){
 
 void INIT_SERIAL(){
   Serial.begin(9600);
-  Serial.println("Serial INIT.");
-  LCD_WRITE("SERIAL Ready!");
+  LCD_WRITE(" Ready!");
 }
 
 void UPDATE(){
@@ -146,6 +169,43 @@ void CYCLE_INFO(){
   LCD_WRITE(sBeschriftung);
   i++;
   delay(3000);
+}
+
+void LOOP_STEUERUNG(){
+  UPDATE();
+
+  //~~LÜFTER~~
+  if(_TEMPERATUR>24.0||_LUFTFEUCHT>70.0){
+    FAN(true);
+    bFAN = true;
+  }else{
+    if(_TEMPERATUR<23.0&&_LUFTFEUCHT<50.0){
+      bFAN = false;
+      FAN(false);}
+  }
+
+  //~~UV~~
+  if(_LICHT<45.0){
+    digitalWrite(pUV, HIGH);
+    bUV = true;
+  }else{
+    bUV = false;
+    digitalWrite(pUV, LOW);
+  }
+
+  //~~WASSER~~
+  if(_ERDFEUCHT<50.0){
+    bPUMP = true;
+    digitalWrite(pPUMP, HIGH);
+  }else{
+    bPUMP = false;
+    digitalWrite(pPUMP, LOW);
+  }
+
+}
+
+void SERIAL_SEND(){
+  Serial.println(String(_TEMPERATUR)+","+String(_ERDFEUCHT)+","+String(_LICHT)+","+String(_LUFTFEUCHT)+","+String(bFAN)+","+String(bUV)+","+String(bPUMP));
 }
 
 
