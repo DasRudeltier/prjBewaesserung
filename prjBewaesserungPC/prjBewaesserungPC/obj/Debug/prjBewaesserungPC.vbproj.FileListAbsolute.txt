@@ -1,0 +1,13 @@
+C:\Users\Jan Röber\Downloads\prjBewaesserungPC\prjBewaesserungPC\bin\Debug\prjBewaesserungPC.exe.config
+C:\Users\Jan Röber\Downloads\prjBewaesserungPC\prjBewaesserungPC\bin\Debug\prjBewaesserungPC.exe
+C:\Users\Jan Röber\Downloads\prjBewaesserungPC\prjBewaesserungPC\bin\Debug\prjBewaesserungPC.pdb
+C:\Users\Jan Röber\Downloads\prjBewaesserungPC\prjBewaesserungPC\bin\Debug\prjBewaesserungPC.xml
+C:\Users\Jan Röber\Downloads\prjBewaesserungPC\prjBewaesserungPC\obj\Debug\prjBewaesserungPC.vbproj.AssemblyReference.cache
+C:\Users\Jan Röber\Downloads\prjBewaesserungPC\prjBewaesserungPC\obj\Debug\prjBewaesserungPC.vbproj.SuggestedBindingRedirects.cache
+C:\Users\Jan Röber\Downloads\prjBewaesserungPC\prjBewaesserungPC\obj\Debug\prjBewaesserungPC.Form1.resources
+C:\Users\Jan Röber\Downloads\prjBewaesserungPC\prjBewaesserungPC\obj\Debug\prjBewaesserungPC.Resources.resources
+C:\Users\Jan Röber\Downloads\prjBewaesserungPC\prjBewaesserungPC\obj\Debug\prjBewaesserungPC.vbproj.GenerateResource.cache
+C:\Users\Jan Röber\Downloads\prjBewaesserungPC\prjBewaesserungPC\obj\Debug\prjBewaesserungPC.vbproj.CoreCompileInputs.cache
+C:\Users\Jan Röber\Downloads\prjBewaesserungPC\prjBewaesserungPC\obj\Debug\prjBewaesserungPC.exe
+C:\Users\Jan Röber\Downloads\prjBewaesserungPC\prjBewaesserungPC\obj\Debug\prjBewaesserungPC.xml
+C:\Users\Jan Röber\Downloads\prjBewaesserungPC\prjBewaesserungPC\obj\Debug\prjBewaesserungPC.pdb
