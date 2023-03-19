@@ -17,6 +17,7 @@ void setup() {
   INIT_TEMP();
     delay(500);
   //INIT_RE();
+  INIT_WEB();
 }
 
 void loop() {
@@ -24,4 +25,6 @@ void loop() {
   LOOP_STEUERUNG();
   SERIAL_SEND();
   //rotary_loop();
+  LOOP_WEB();
+  LOOP_TIMER();
 }
