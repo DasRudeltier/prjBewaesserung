@@ -3,7 +3,7 @@
 #define pFAN 26
 #define pPUMP 25
 #define pUV 14
-#define pERDE 12
+#define pERDE 32
 
 //I2C Adressen
 //0x27 LCD 16x2 Display
@@ -28,6 +28,8 @@ bool bFAN;
 bool bUV;
 bool bPUMP;
 
+int TIMER = 0;
+
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
 #include <Arduino.h>
@@ -36,9 +38,54 @@ bool bPUMP;
 #include <BH1750.h>
 #include <SHT2x.h>
 
+#include <DNSServer.h>
+#include <WiFi.h>
+#include <AsyncTCP.h>
+#include "ESPAsyncWebServer.h"
+#include <WEBPAGE.h>
+#include <WebSocketsServer.h>
+#include <ArduinoJson.h>
+
 LiquidCrystal_I2C lcd(0x27,16,2);
 BH1750 lightMeter(0x23);
 SHT2x sht;
+
+void webSocketEvent(uint8_t , WStype_t, uint8_t * , size_t );
+void sendResponse();
+WebSocketsServer webSocket = WebSocketsServer(81); // Create a WebSocketsServer listening to port 81
+DNSServer dnsServer;
+AsyncWebServer server(80);
+
+bool con = false;                                  // Connection state of WebSocket
+boolean bChange = true;                            // Change flag
+boolean LED1 = false;                              // Save the current state of LED1
+
+class CaptiveRequestHandler : public AsyncWebHandler {
+public:
+  CaptiveRequestHandler() {}
+  virtual ~CaptiveRequestHandler() {}
+
+  bool canHandle(AsyncWebServerRequest *request){
+    //request->addInterestingHeader("ANY");
+    return true;
+  }
+
+  void handleRequest(AsyncWebServerRequest *request) {
+    AsyncResponseStream *response = request->beginResponseStream("text/html");
+    response->print(html);
+    request->send(response);
+  }
+};
+
+void LOOP_TIMER(){
+  if (TIMER == 10)
+  {
+    TIMER = 0;
+  }else{
+    TIMER++;
+  }
+  delay(100);
+}
 
 int var83;
 void LCD_TEST(){
@@ -58,7 +105,6 @@ void LCD_WRITE(String EING){
   lcd.print("                ");
   lcd.home();
   lcd.print(EING);
-  delay(300);
 }
 
 void INIT_FAN(){
@@ -136,7 +182,7 @@ void LCD_PREV(){
 
 void INIT_SERIAL(){
   Serial.begin(9600);
-  LCD_WRITE(" Ready!");
+  LCD_WRITE("SERIAL Ready!");
 }
 
 void UPDATE(){
@@ -148,6 +194,8 @@ void UPDATE(){
 
 int i = 1;
 void CYCLE_INFO(){
+  
+  if(TIMER == 5 || TIMER == 10){
   UPDATE();
   String sBeschriftung = "";
   switch (i)
@@ -168,7 +216,8 @@ void CYCLE_INFO(){
   }
   LCD_WRITE(sBeschriftung);
   i++;
-  delay(3000);
+  //"TIMER" Abfrage
+  }
 }
 
 void LOOP_STEUERUNG(){
@@ -259,3 +308,67 @@ void INIT_RE(){
 }
 
 */
+
+//############WEBSERVER#############
+//############WEBSERVER#############
+//############WEBSERVER#############
+
+void INIT_WEB(){
+  //your other setup stuff...
+  WiFi.softAP("JaTiMa Bewässerungssystem");
+  dnsServer.start(53, "*", WiFi.softAPIP());
+  server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);//only when requested from AP
+  //more handlers...
+  server.begin();
+  webSocket.begin();
+  webSocket.onEvent(webSocketEvent);
+}
+
+void LOOP_WEB(){
+  dnsServer.processNextRequest();
+  webSocket.loop();
+  if (con == true) {
+    sendResponse(); 
+  }
+}
+
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t lenght) {
+  switch (type) {
+    case WStype_DISCONNECTED:
+      if(DEBUG)Serial.println("Websocket disconnected!");
+      con = false;
+      break;
+
+    case WStype_CONNECTED:
+      if(DEBUG)Serial.print("Websocket connected to ");
+      if(DEBUG)Serial.println(webSocket.remoteIP(num));
+      con = true;
+      bChange = true;
+      break;
+
+    case WStype_TEXT:
+      // Receive request from Client
+      String text = String((char *) payload);
+      if(DEBUG)Serial.println((String)"client " + num + (String)": " + text);
+      break;
+  }
+}
+
+void sendResponse() {
+  char buf[128*2];
+  DynamicJsonDocument doc(128*2);
+  doc["action"] = "response";
+  doc["TEMP"] = String(_TEMPERATUR)+"°C";
+  doc["LUFE"] = String(_LUFTFEUCHT)+"%";
+  doc["ERFE"] = String(_ERDFEUCHT)+"%";
+  doc["HELI"] = String(_LICHT)+" LUX";
+  doc["PUMP"] = bPUMP ? "An" : "Aus";
+  doc["LICH"] = bUV ? "An" : "Aus";
+  doc["LUER"] = bFAN ? "An" : "Aus";
+
+  size_t lenght = serializeJson(doc, buf, sizeof(buf));
+
+  //webSocket.sendTXT(0, buf, lenght);
+  webSocket.broadcastTXT(buf, lenght);
+  if(DEBUG)Serial.println((String)"broadcast: " + buf);
+}
