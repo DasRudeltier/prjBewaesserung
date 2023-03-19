@@ -45,41 +45,51 @@ Public Class Form1
 
     Public TIME As Double = 0
     Private Sub Timer1_Tick_1(sender As Object, e As EventArgs) Handles Timer1.Tick
-        If SerialPort1.IsOpen = True Then
-            Dim ReceivedMessage As String
-            ReceivedMessage = SerialPort1.ReadLine
+        Try
 
-            Dim items() As String = ReceivedMessage.Split(","c)
+            If SerialPort1.IsOpen = True Then
+                Dim ReceivedMessage As String
+                ReceivedMessage = SerialPort1.ReadLine
 
-            Label1.Text = "Temp: " + items(0) + "°C"
-            Label2.Text = "Erdfeucht." + items(1) + "%"
-            Label3.Text = "Helligkeit." + items(2) + " LUX"
-            Label4.Text = "Luftfeucht." + items(3) + "%"
+                Dim items() As String = ReceivedMessage.Split(","c)
 
-            If Debug.Checked Then
-                Label5.Text = ReceivedMessage
-            Else Label5.Text = ""
+                Label1.Text = "Temp: " + items(0) + "°C"
+                Label2.Text = "Erdfeucht." + items(1) + "%"
+                Label3.Text = "Helligkeit." + items(2) + " LUX"
+                Label4.Text = "Luftfeucht." + items(3) + "%"
+
+                If Debug.Checked Then
+                    Label5.Text = ReceivedMessage
+                Else Label5.Text = ""
+                End If
+
+                If items(4) = 1 Then
+                    CheckedListBox1.SetItemChecked(0, True)
+                Else CheckedListBox1.SetItemChecked(0, False)
+                End If
+
+                If items(5) = 1 Then
+                    CheckedListBox1.SetItemChecked(1, True)
+                Else CheckedListBox1.SetItemChecked(1, False)
+                End If
+
+                If items(6) = 1 Then
+                    CheckedListBox1.SetItemChecked(2, True)
+                Else CheckedListBox1.SetItemChecked(2, False)
+                End If
+                Chart1.Series(0).Points.AddXY(TIME, items(0))
+                Chart1.Series(1).Points.AddXY(TIME, items(1))
+                Chart1.Series(2).Points.AddXY(TIME, items(2))
+                Chart1.Series(3).Points.AddXY(TIME, items(3))
+                TIME = TIME + 0.5
             End If
+        Catch exception As Exception
 
-            If items(4) = 1 Then
-                CheckedListBox1.SetItemChecked(0, True)
-            Else CheckedListBox1.SetItemChecked(0, False)
-            End If
-
-            If items(5) = 1 Then
-                CheckedListBox1.SetItemChecked(1, True)
-            Else CheckedListBox1.SetItemChecked(1, False)
-            End If
-
-            If items(6) = 1 Then
-                CheckedListBox1.SetItemChecked(2, True)
-            Else CheckedListBox1.SetItemChecked(2, False)
-            End If
-            Chart1.Series(0).Points.AddXY(TIME, items(0))
-            Chart1.Series(1).Points.AddXY(TIME, items(1))
-            Chart1.Series(2).Points.AddXY(TIME, items(2))
-            Chart1.Series(3).Points.AddXY(TIME, items(3))
-            TIME = TIME + 4
-        End If
+            Label6.Text = exception.ToString()
+            Timer1.Stop()
+            SerialPort1.Close()
+            Button1.Visible = True
+            Button2.Visible = False
+        End Try
     End Sub
 End Class
